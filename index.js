@@ -9,25 +9,8 @@ const port = 5511; // Change to your desired port
 app.use(cors());
 app.use(bodyParser.json());
 
-const mongoURL = "mongodb+srv://tiwariabhi1406:Abhishek%401@cluster0.bnpvium.mongodb.net/ "
+const mongoURL = "mongodb+srv://tiwariabhi1406:Abhishek%401@cluster0.bnpvium.mongodb.net/";
 const client = new MongoClient(mongoURL, { useNewUrlParser: true, useUnifiedTopology: true });
-async function createCollection() {
-    await db.createCollection('myCollection'); // Create the collection
-
-  console.log('Database and collection created successfully');
-  
-  // Perform other operations within this async function if needed
-}
-
-// Call the async function
-createCollection()
-  .then(() => {
-    // You can perform other operations after the collection is created
-  })
-  .catch((err) => {
-    console.error('Error creating collection: ' + err.message);
-  });
-
 
 // Connect to MongoDB
 async function connectToMongoDB() {
@@ -45,6 +28,7 @@ app.get('/', (req, res) => {
   res.send('Welcome to the server');
 });
 
+// Create a MongoDB collection (if it doesn't exist)
 async function createCollection() {
   const db = client.db("myCollection");
   const collections = await db.listCollections().toArray();
@@ -57,7 +41,6 @@ async function createCollection() {
     console.log('Collection already exists');
   }
 }
-
 
 createCollection();
 
@@ -96,7 +79,7 @@ app.post('/sendData', async (req, res) => {
 app.post('/checkLogin', async (req, res) => {
   const { email, password } = req.body;
 
-  const db = client.db(dbName);
+  const db = client.db("myCollection"); // Use the correct database name here
   const collection = db.collection('newTable');
 
   try {
