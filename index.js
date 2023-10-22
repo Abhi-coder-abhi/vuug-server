@@ -17,6 +17,9 @@ async function connectToMongoDB() {
   try {
     await client.connect();
     console.log('Connected to MongoDB');
+    app.listen(port, () => {
+      console.log(`Server is running on port ${port}`);
+    })
   } catch (err) {
     console.error('MongoDB connection error: ' + err.message);
   }
@@ -96,6 +99,3 @@ app.post('/checkLogin', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
