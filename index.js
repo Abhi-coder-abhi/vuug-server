@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const { MongoClient } = require('mongodb');
+const mongoose = require('mongoose');
 
 const app = express();
 const port = 5511; // Change to your desired port
@@ -9,93 +9,95 @@ const port = 5511; // Change to your desired port
 app.use(cors());
 app.use(bodyParser.json());
 
-const mongoURL = "mongodb+srv://tiwariabhi1406:Abhishek%401@cluster0.bnpvium.mongodb.net/";
-const client = new MongoClient(mongoURL, { useNewUrlParser: true, useUnifiedTopology: true });
+const mongoURL = "mongodb+srv://priyamsingh9455:abhishek@cluster0.1ymm2pf.mongodb.net/mydtabase";
 
 // Connect to MongoDB
-async function connectToMongoDB() {
-  try {
-    await client.connect();
-    console.log('Connected to MongoDB');
-    app.listen(port, () => {
-      console.log(`Server is running on port ${port}`);
-    })
-  } catch (err) {
-    console.error('MongoDB connection error: ' + err.message);
-  }
-}
+mongoose.connect(mongoURL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
-connectToMongoDB();
+const db = mongoose.connection;
+
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+db.once('open', () => {
+  console.log('Connected to MongoDB');
+  app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+  });
+});
+
+// Define Mongoose Schemas
+const userSchema = new mongoose.Schema({
+  email: String,
+  password: String,
+  phoneNumber: String,
+  address: String,
+  pincode: String,
+  dateOfBirth: Date,
+  name: String,
+}, { collection: 'users' }); // Specify collection name manually
+
+const User = mongoose.model('User', userSchema);
+
+const bookingSchema = new mongoose.Schema({
+  checkin: Date,
+  checkout: Date,
+  adult: Number,
+  children: Number,
+  email: String,
+}, { collection: 'bookings' }); // Specify collection name manually
+
+const Booking = mongoose.model('Booking', bookingSchema);
+
+// Routes
 
 app.get('/', (req, res) => {
   res.send('Welcome to the server');
 });
 
-// Create a MongoDB collection (if it doesn't exist)
-async function createCollection() {
-  const db = client.db("myCollection");
-  const collections = await db.listCollections().toArray();
-  const collectionNames = collections.map((collection) => collection.name);
-
-  if (!collectionNames.includes('newTable')) {
-    await db.createCollection('newTable');
-    console.log('MongoDB collection created');
-  } else {
-    console.log('Collection already exists');
-  }
-}
-
-createCollection();
-
+// Create a new user
 app.post('/sendData', async (req, res) => {
   const { email, password, phoneNumber, address, pincode, dateOfBirth, name } = req.body;
-
-  const isValidDate = (dateString) => {
-    return !isNaN(new Date(dateString).getTime());
-  };
-
-  let dateOfBirthValue = isValidDate(dateOfBirth) ? new Date(dateOfBirth) : new Date('1991-01-01');
-
-  const db = client.db("myCollection");
-  const collection = db.collection('newTable');
-
-  const data = {
+  // Create a new user document
+  const newUser = new User({
     email,
     password,
     phoneNumber,
     address,
     pincode,
-    dateOfBirth: dateOfBirthValue,
+    dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date('1991-01-01'),
     name,
-  };
+  });
 
   try {
-    await collection.insertOne(data);
-    console.log('Data inserted successfully');
-    res.status(200).json({ message: 'Data received and inserted successfully' });
+    await newUser.save();
+    console.log('User data inserted successfully');
+    res.status(200).json({ message: 'User data received and inserted successfully' });
   } catch (err) {
-    console.error('Data insertion error: ' + err.message);
-    res.status(500).json({ error: 'Data insertion error' });
+    console.error('User data insertion error: ' + err.message);
+    res.status(500).json({ error: 'User data insertion error' });
   }
 });
 
-app.post('/checkLogin', async (req, res) => {
-  const { email, password } = req.body;
-
-  const db = client.db("myCollection"); // Use the correct database name here
-  const collection = db.collection('newTable');
+// Handle booking request
+app.post('/book-room', async (req, res) => {
+  const { checkin, checkout, adult, children, email } = req.body;
+  // Create a new booking document
+  const newBooking = new Booking({
+    checkin,
+    checkout,
+    adult,
+    children,
+    email,
+  });
 
   try {
-    const result = await collection.findOne({ email, password });
-
-    if (result) {
-      res.status(200).json({ message: 'Login successful' });
-    } else {
-      res.status(401).json({ error: 'Invalid email or password' });
-    }
+    await newBooking.save();
+    console.log('Booking data inserted successfully');
+    res.status(200).json({ message: 'Booking data received and inserted successfully' });
   } catch (err) {
-    console.error('Database query error: ' + err.message);
-    res.status(500).json({ error: 'Database query error' });
+    console.error('Booking data insertion error: ' + err.message);
+    res.status(500).json({ error: 'Booking data insertion error' });
   }
 });
-
