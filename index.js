@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
 const app = express();
-const port = procsess.env.port||5511; // Change to your desired port
+const port = process.env.PORT||5511; // Change to your desired port
 
 app.use(cors());
 app.use(bodyParser.json());
