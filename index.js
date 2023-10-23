@@ -9,7 +9,7 @@ const port = 5511; // Change to your desired port
 app.use(cors());
 app.use(bodyParser.json());
 
-const mongoURL = "mongodb+srv://priyamsingh9455:abhishek@cluster0.1ymm2pf.mongodb.net/mydtabase";
+const mongoURL = "mongodb+srv://tiwariabhi1406:<password>@cluster0.bnpvium.mongodb.net/mydatabase";
 
 // Connect to MongoDB
 mongoose.connect(mongoURL, {
