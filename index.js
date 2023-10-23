@@ -79,22 +79,21 @@ app.post('/sendData', async (req, res) => {
 });
 app.post('/checkLogin', async (req, res) => {
   const { email, password } = req.body;
-
-  // Add your authentication logic here to check if the provided email and password are valid.
-  // For example, you can query the 'User' model in the database to validate the user's credentials.
-
-  User.findOne({ email, password }, (err, user) => {
-    if (err) {
+    try {
+      const user = await User.findOne({ email, password }).exec();
+  
+      if (user) {
+        // User authentication is successful
+        res.status(200).json({ message: 'Login successful', data: user });
+      } else {
+        // Invalid email or password
+        res.status(401).json({ error: 'Invalid email or password' });
+      }
+    } catch (err) {
       console.error('Database query error: ' + err.message);
       res.status(500).json({ error: 'Database query error' });
-    } else if (user) {
-      // User authentication is successful
-      res.status(200).json({ message: 'Login successful', data: user });
-    } else {
-      // Invalid email or password
-      res.status(401).json({ error: 'Invalid email or password' });
     }
-  });
+  
 });
 
 // Handle booking request
