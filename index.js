@@ -1,21 +1,19 @@
+require('dotenv').config()
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
 const app = express();
-const port = 5511; // Change to your desired port
+const port = procsess.env.port||5511; // Change to your desired port
 
 app.use(cors());
 app.use(bodyParser.json());
 
-const mongoURL = "mongodb+srv://tiwariabhi1406:<password>@cluster0.bnpvium.mongodb.net/mydatabase";
+const mongoURL = process.env.MONGO_URI
 
 // Connect to MongoDB
-mongoose.connect(mongoURL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect(mongoURL);
 
 const db = mongoose.connection;
 
