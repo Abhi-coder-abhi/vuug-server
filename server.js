@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 
 app.get("/",(req,res)=>{
     const randomString = Math.random().toString(36).substring(7);
-res.send(randomString);
+res.send("abhi");
 })
 
 app.use("/api/users", users_routes)
