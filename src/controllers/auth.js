@@ -2,7 +2,7 @@ const userModel = require("../models/user-model")
 const mailOTP = require("../services/node-mailer")
 const generateToken = require("../services/generate-token")
 const getAllUsers = async (req, res) => {
- 
+    return res.status(200).json({ error: "User with this email already exists. Please sign in." });
 }
 const registerUser = async (req, res) => {
     try {
