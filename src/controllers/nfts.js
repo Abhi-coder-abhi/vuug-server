@@ -1,0 +1,1 @@
+const landModel = require("../models/nfts/lands")

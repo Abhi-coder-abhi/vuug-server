@@ -1,36 +1,30 @@
 const userModel = require("../models/user-model")
-const mailOTP = require("../services/node-mailer")
-const generateToken = require("../services/generate-token")
+const otpModel = require("../models/otp-model")
+const { mailOTP } = require("../services/node-mailer")
+const { generateToken, decodeToken, Authenticated, PassAuthenticated, validate } = require('../services/generate-token'); // Adjust the path as needed
+
 const getAllUsers = async (req, res) => {
     return res.status(200).json({ error: "User with this email already exists. Please sign in." });
 }
 const registerUser = async (req, res) => {
     try {
-        const { name, email, password, address, mobile, dob, userid, aadhar } = req.body;
+        const { email, password, userId } = req.body;
         let existingUser = await userModel.findOne({ email: email });
         if (existingUser) {
-
             return res.status(400).json({ error: "User with this email already exists. Please sign in." });
-
         }
 
         // Check if mobile already exists
-        existingUser = await userModel.findOne({ mobile: mobile });
+        existingUser = await userModel.findOne({ userId: userId });
         if (existingUser) {
-            return res.status(400).json({ error: "User with this mobile number already exists please sign in" });
+            return res.status(400).json({ error: "User with this user-name already exists please take new name" });
         }
 
         const newUser = new userModel({
-            name: name,
             email: email,
             password: password,
-            address: address,
-            mobile: mobile,
-            dob: dob,
-            userid: userid,
-            aadhar: aadhar
+            userId: userId,
         });
-
         const savedUser = await newUser.save();
 
         return res.status(200).json(savedUser);
@@ -45,9 +39,7 @@ const verifyGoogleEmail = async (req, res) => {
         const email = req.body.email
         let existingUser = await userModel.findOne({ email: email });
         if (existingUser) {
-
             const token = generateToken({ id: existingUser._id })
-
             return res.status(200).json({ token });
         } else {
             return res.status(404).json({ message: 'User not found' });
@@ -57,23 +49,79 @@ const verifyGoogleEmail = async (req, res) => {
     }
 }
 
-
-const verifyUserEmail = async (req, res) => {
+const verifyEmail = async (req, res) => {
     try {
-        const OTP = Math.random().toString(36).substring(7);
-        const result = await mailOTP(req.body.email, OTP);
+        const result = await mailOTP(req.body.email);
         return res.status(200).json({ result });
     }
     catch (error) {
         res.status(500).send(error.message);
     }
 }
+const verifyUserEmail = async (req, res) => {
+    try {
+        const OTP = Math.random().toString(36).substring(7);
+        const email = req.body.email
+        const type = req.body.type;
+        if(type === "signup"){
+        const existingUser = await userModel.findOne({ email: email });
+        if (existingUser) {
+            return res.status(400).json({ error: "User with this email already exists. Please sign in." });
+        }
+        }
+        let existingOtp = await otpModel.findOne({ email: email });
+        if (existingOtp) {
+            await otpModel.findOneAndUpdate({ email: email }, { $set: { otp: OTP } });
+        }
+        else {
+            const newUser = new otpModel({
+                email: email,
+                otp: OTP,
+            });
+            await newUser.save();
+        }
+        const result = await mailOTP(email, OTP);
+        return res.status(200).json({ result });
+    }
+    catch (error) {
+        res.status(500).send(error.message);
+    }
+}
+const verifyUserOtp = async (req, res) => {
+    try {
+        const OTP = req.body.otp
+        const email = req.body.email
+        let existingUser = await otpModel.findOne({ email: email, otp: OTP });
+        if (!existingUser || existingUser.otp === null) {
+            return res.status(404).json({ message: 'OTP do not match' });
+        }
+        await userModel.findOneAndUpdate({ email: email, otp: OTP }, { $set: { otp: null } });
+        return res.status(200).json("OTP matched successfully");
+    }
+    catch (error) {
+        res.status(500).send(error.message);
+    }
+}
 
+const changePassword = async (req, res) => {
+    try {
+        const email = req.body.email
+
+        const password = req.body.password
+        if (email) {
+            await userModel.findOneAndUpdate({ email: email }, { $set: { password: password } });
+        }
+        return res.status(200).json("Password updated successfully");
+    }
+    catch (error) {
+        res.status(500).send(error.message);
+    }
+}
 
 const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
-    
+
         let existingUser = await userModel.findOne({
             $or: [
                 { email: email, password: password },
@@ -82,9 +130,9 @@ const loginUser = async (req, res) => {
         });
         if (existingUser) {
 
-            const token = generateToken({ id: existingUser._id })
-
-            return res.status(200).json({ token });
+            const token = await generateToken({ id: existingUser._id })
+console.log({token: token, user: existingUser})
+            return res.status(200).json({token: token, user: existingUser});
         } else {
             return res.status(404).json({ message: 'User not found or wrong password' });
         }
@@ -94,5 +142,10 @@ const loginUser = async (req, res) => {
     }
 };
 
+const profile = async(req,res)=>{
+   return  res.success({ user: req.user });
+}
 
-module.exports = { getAllUsers, registerUser, verifyUserEmail, verifyGoogleEmail, loginUser  }
+
+
+module.exports = { getAllUsers, registerUser, verifyUserEmail, verifyGoogleEmail, loginUser, verifyEmail, verifyUserOtp, changePassword,profile };
