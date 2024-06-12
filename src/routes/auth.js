@@ -14,7 +14,7 @@ router.route("/register").post(registerUser)
 router.route("/login").post(loginUser)
 router.route("/verify-email").post(verifyUserEmail)
 router.route("/verify-otp").post(Authenticated,verifyUserOtp)
-router.route("/google-login").post(Authenticated,verifyGoogleEmail)
+router.route("/google-login").post(verifyGoogleEmail)
 router.route("/change-password").post(Authenticated,changePassword)
 router.route("/me").get(Authenticated,profile)
 
