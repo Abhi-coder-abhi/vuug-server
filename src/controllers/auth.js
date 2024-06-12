@@ -66,7 +66,7 @@ photo: userInfo.picture,
             });
             const savedUser = await newUser.save();
     
-            return res.status(200).json(savedUser);
+            return res.status(200).json("abhi");
         }
        
     } catch (error) {
