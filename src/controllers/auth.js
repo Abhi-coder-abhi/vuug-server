@@ -38,12 +38,38 @@ const verifyGoogleEmail = async (req, res) => {
     try {
         const id = req.body.id
         const userInfo = req.body.userInfo
-       
+        if (!userInfo.email_verified){
+return res.status(404).json({ message: 'user is not verified on google' });
+        }
+        if(id ==="sign_in"){
+            const existingUser = await userModel.findOne({ email: userInfo.email });
+            if (existingUser ) {
+                if(!existingUser.googleLogin){
+                    return res.status(404).json({ message: 'Please Login using password' });
+                }
+                const token = generateToken({ id: existingUser._id })
+                return res.status(200).json({ token });
+            } else {
+                return res.status(404).json({ message: 'User not found' });
+            }
+        }
+        else{
+            const existingUser = await userModel.findOne({ email: userInfo.email }); 
+            if (existingUser ) { 
+                return res.status(404).json({ message: 'Email already registered' });
+            }
+            const newUser = new userModel({
+                email: userInfo.email,
+                firstName: userInfo.given_name,
+lastName: userInfo.family_name,
+photo: userInfo.picture,
+            });
+            const savedUser = await newUser.save();
     
-            return res.status(200).json("abhi");
+            return res.status(200).json(savedUser);
         }
        
-    catch (error) {
+    } catch (error) {
         return res.status(500).send(error.message)
     }
 }
