@@ -12,10 +12,12 @@ jobs:
   build:
 
     runs-on: self-hosted
-
+    defaults:
+       run:
+         working-directory: ./server/
     strategy:
       matrix:
-        node-version: [ 18.x]
+        node-version: [ 14.x,16.x,18.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
@@ -25,6 +27,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+        cache-dependency-path: './server/package-lock.json'
     - run: npm ci
     - run: npm run build --if-present
     - run: npm test
