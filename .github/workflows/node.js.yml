@@ -12,8 +12,9 @@ jobs:
   build:
 
     runs-on: self-hosted
-    matrix:
-        node: [ 14.x, 16.x, 18.x ]
+    strategy:
+        matrix:
+              node: [ 14.x, 16.x, 18.x ]
     name: Node ${{ matrix.node }} sample
     steps:
       - uses: actions/checkout@v4
@@ -22,7 +23,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: 'npm'
-          cache-dependency-path: ./abhi/package-lock.json
+          cache-dependency-path: '**/package-lock.json'
       - run: npm ci
       - run: npm run build --if-present
       - run: npm test
