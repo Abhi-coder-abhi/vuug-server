@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: 'npm'
-          cache-dependency-path: "${{ inputs.path }}/${{ env.LOCKFILE }}"
+          cache-dependency-path: ${{github.workspace}}
       - run: npm ci
       - run: npm run build --if-present
       - run: npm test
