@@ -34,6 +34,7 @@ const registerUser = async (req, res) => {
     }
 };
 
+
 const verifyGoogleEmail = async (req, res) => {
     try {
         const id = req.body.id
