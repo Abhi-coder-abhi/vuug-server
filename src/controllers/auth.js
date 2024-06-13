@@ -51,10 +51,10 @@ return res.status(404).json({ message: 'user is not verified on google' });
                 const token = generateToken({ id: existingUser._id })
                 return res.status(200).json({ token });
             } else {
-                return res.status(404).json({ message: 'User not found' });
+                return res.status(404).json({ message: 'User ' });
             }
         }
-        
+        ``
         else{
             const existingUser = await userModel.findOne({ email: userInfo.email }); 
             if (existingUser ) { 
