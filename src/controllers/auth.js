@@ -39,13 +39,13 @@ const verifyGoogleEmail = async (req, res) => {
     try {
         const id = req.body.id
         const userInfo = req.body.userInfo
-        if (!userInfo.email_verified){
-return res.status(404).json({ message: 'user is not verified on google' });
+        if (!userInfo.email_verified) {
+            return res.status(404).json({ message: 'user is not verified on google' });
         }
-        if(id ==="sign_in"){
+        if (id === "sign_in") {
             const existingUser = await userModel.findOne({ email: userInfo.email });
-            if (existingUser ) {
-                if(!existingUser.googleLogin){
+            if (existingUser) {
+                if (!existingUser.googleLogin) {
                     return res.status(404).json({ message: 'Please Login using password' });
                 }
                 const token = generateToken({ id: existingUser._id })
@@ -54,23 +54,23 @@ return res.status(404).json({ message: 'user is not verified on google' });
                 return res.status(404).json({ message: 'User ' });
             }
         }
-        
-        else{
-            const existingUser = await userModel.findOne({ email: userInfo.email }); 
-            if (existingUser ) { 
+
+        else {
+            const existingUser = await userModel.findOne({ email: userInfo.email });
+            if (existingUser) {
                 return res.status(404).json({ message: 'Email already registered' });
             }
             const newUser = new userModel({
                 email: userInfo.email,
                 firstName: userInfo.given_name,
-lastName: userInfo.family_name,
-photo: userInfo.picture,
+                lastName: userInfo.family_name,
+                photo: userInfo.picture,
             });
             const savedUser = await newUser.save();
-    
+
             return res.status(200).json(savedUser);
         }
-       
+
     } catch (error) {
         return res.status(500).send(error.message)
     }
@@ -79,7 +79,7 @@ photo: userInfo.picture,
 const verifyEmail = async (req, res) => {
     try {
         const result = await mailOTP(req.body.email);
-        return res.status(200).json({ result });
+        return res.status(200).json("abhi");
     }
     catch (error) {
         res.status(500).send(error.message);
@@ -87,14 +87,22 @@ const verifyEmail = async (req, res) => {
 }
 const verifyUserEmail = async (req, res) => {
     try {
-        const OTP = Math.random().toString(36).substring(7);
-        const email = req.body.email
-        const type = req.body.type;
-        if(type === "signup"){
-        const existingUser = await userModel.findOne({ email: email });
-        if (existingUser) {
-            return res.status(400).json({ error: "User with this email already exists. Please sign in." });
+        const OTP =  Math.floor(10000 + Math.random() * 90000);
+        console.log("................/////api");
+        const email = req.body.email;
+        console.log(email);
+        if (!email) {
+            return res.status(400).json({ 
+                succes: false,
+                message: "Email is required"
+            })
         }
+        const type = req.body.type;
+        if (type === "signup") {
+            const existingUser = await userModel.findOne({ email: email });
+            if (existingUser) {
+                return res.status(400).json({ error: "User with this email already exists. Please sign in." });
+            }
         }
         let existingOtp = await otpModel.findOne({ email: email });
         if (existingOtp) {
@@ -158,8 +166,8 @@ const loginUser = async (req, res) => {
         if (existingUser) {
 
             const token = await generateToken({ id: existingUser._id })
-console.log({token: token, user: existingUser})
-            return res.status(200).json({token: token, user: existingUser});
+            console.log({ token: token, user: existingUser })
+            return res.status(200).json({ token: token, user: existingUser });
         } else {
             return res.status(404).json({ message: 'User not found or wrong password' });
         }
@@ -169,10 +177,10 @@ console.log({token: token, user: existingUser})
     }
 };
 
-const profile = async(req,res)=>{
-   return  res.success({ user: req.user });
+const profile = async (req, res) => {
+    return res.success({ user: req.user });
 }
 
 
 
-module.exports = { getAllUsers, registerUser, verifyUserEmail, verifyGoogleEmail, loginUser, verifyEmail, verifyUserOtp, changePassword,profile };
+module.exports = { getAllUsers, registerUser, verifyUserEmail, verifyGoogleEmail, loginUser, verifyEmail, verifyUserOtp, changePassword, profile };
