@@ -8,8 +8,8 @@ const userSchema = new mongoose.Schema({
     country: { type: String, },
     state: { type: String, },
     pinCode: { type: String, },
-    password: { type: String, required: true },
-    userId:{type:String,required: true},
+    password: { type: String,  },
+    userId:{type:String,},
     googleLogin: { type: Boolean, default: false },
 dob: { type: String,},
 mobile:{type:String,}

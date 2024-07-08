@@ -1,10 +1,12 @@
  function responseService(req, res, next) {
   res.success = (data, message) => {
+    console.log("data:"+data+" message:"+message)
     if (typeof data !== "object")
-      return res.status(200).json({ success: true, message, data });
+      return res.status(200).json({ success: true, message, data,status:200 });
 
     res.status(200).json({
       success: true,
+      status:200,
       message,
       ...data,
       timestamp: new Date(),

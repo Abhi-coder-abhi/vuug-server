@@ -11,13 +11,13 @@ const registerUser = async (req, res) => {
         const { email, password, userId } = req.body;
         let existingUser = await userModel.findOne({ email: email });
         if (existingUser) {
-            return res.status(400).json({ error: "User with this email already exists. Please sign in." });
+            return res.error({ error: "User with this email already exists. Please sign in." });
         }
 
         // Check if mobile already exists
         existingUser = await userModel.findOne({ userId: userId });
         if (existingUser) {
-            return res.status(400).json({ error: "User with this user-name already exists please take new name" });
+            return res.error({ error: "User with this user-name already exists please take new name" });
         }
 
         const newUser = new userModel({
@@ -27,10 +27,10 @@ const registerUser = async (req, res) => {
         });
         const savedUser = await newUser.save();
 
-        return res.status(200).json(savedUser);
+        return res.success(200).json(savedUser);
     } catch (error) {
         console.error(error.message);
-        res.status(500).json({ error: "Failed to register user" });
+        res.error(500).json({ error: "Failed to register user" });
     }
 };
 
@@ -40,49 +40,51 @@ const verifyGoogleEmail = async (req, res) => {
         const id = req.body.id
         const userInfo = req.body.userInfo
         if (!userInfo.email_verified) {
-            return res.status(404).json({ message: 'user is not verified on google' });
+            return res.error(404).json({ message: 'user is not verified on google' });
         }
         if (id === "sign_in") {
             const existingUser = await userModel.findOne({ email: userInfo.email });
             if (existingUser) {
                 if (!existingUser.googleLogin) {
-                    return res.status(404).json({ message: 'Please Login using password' });
+                    return res.error(404).json({ message: 'Please Login using password' });
                 }
                 const token = generateToken({ id: existingUser._id })
-                return res.status(200).json({ token });
+                console.log(token)
+                return res.success(200).json(token);
             } else {
-                return res.status(404).json({ message: 'User ' });
+                return res.error(404).json({ message: 'User ' });
             }
         }
 
         else {
             const existingUser = await userModel.findOne({ email: userInfo.email });
             if (existingUser) {
-                return res.status(404).json({ message: 'Email already registered' });
+                return res.error(404).json({ message: 'Email already registered' });
             }
             const newUser = new userModel({
                 email: userInfo.email,
                 firstName: userInfo.given_name,
                 lastName: userInfo.family_name,
                 photo: userInfo.picture,
+                googleLogin:true,
             });
             const savedUser = await newUser.save();
 
-            return res.status(200).json(savedUser);
+            return res.success(200).json(savedUser);
         }
 
     } catch (error) {
-        return res.status(500).send(error.message)
+        return res.error(500).send(error.message)
     }
 }
 
 const verifyEmail = async (req, res) => {
     try {
         const result = await mailOTP(req.body.email);
-        return res.status(200).json("abhi");
+        return res.success(200).json("abhi");
     }
     catch (error) {
-        res.status(500).send(error.message);
+        res.error(500).send(error.message);
     }
 }
 const verifyUserEmail = async (req, res) => {
@@ -92,7 +94,7 @@ const verifyUserEmail = async (req, res) => {
         const email = req.body.email;
         console.log(email);
         if (!email) {
-            return res.status(400).json({ 
+            return res.error(400).json({ 
                 succes: false,
                 message: "Email is required"
             })
@@ -101,7 +103,7 @@ const verifyUserEmail = async (req, res) => {
         if (type === "signup") {
             const existingUser = await userModel.findOne({ email: email });
             if (existingUser) {
-                return res.status(400).json({ error: "User with this email already exists. Please sign in." });
+                return res.error(400).json({ error: "User with this email already exists. Please sign in." });
             }
         }
         let existingOtp = await otpModel.findOne({ email: email });
@@ -116,28 +118,28 @@ const verifyUserEmail = async (req, res) => {
             await newUser.save();
         }
         const result = await mailOTP(email, OTP);
-        return res.status(200).json({ result });
+        return res.success(result );
     }
     catch (error) {
-        res.status(500).send(error.message);
+        res.error(500,error.message);
     }
 }
+
 const verifyUserOtp = async (req, res) => {
     try {
         const OTP = req.body.otp
         const email = req.body.email
         let existingUser = await otpModel.findOne({ email: email, otp: OTP });
         if (!existingUser || existingUser.otp === null) {
-            return res.status(404).json({ message: 'OTP do not match' });
+            return res.error(404).json({ message: 'OTP do not match' });
         }
         await userModel.findOneAndUpdate({ email: email, otp: OTP }, { $set: { otp: null } });
-        return res.status(200).json("OTP matched successfully");
+        return res.success(200).json("OTP matched successfully");
     }
     catch (error) {
-        res.status(500).send(error.message);
+        res.error(500).send(error.message);
     }
 }
-
 const changePassword = async (req, res) => {
     try {
         const email = req.body.email
@@ -146,13 +148,27 @@ const changePassword = async (req, res) => {
         if (email) {
             await userModel.findOneAndUpdate({ email: email }, { $set: { password: password } });
         }
-        return res.status(200).json("Password updated successfully");
+        return res.success(200).json("Password updated successfully");
     }
     catch (error) {
-        res.status(500).send(error.message);
+        res.error(500).send(error.message);
     }
 }
 
+const forgotPassword = async (req, res) => {
+    try {
+        const email = req.body.email
+
+        const password = req.body.password
+        if (email) {
+            await userModel.findOneAndUpdate({ email: email }, { $set: { password: password } });
+        }
+        return res.success(200).json("Password updated successfully");
+    }
+    catch (error) {
+        res.error(500).send(error.message);
+    }
+}
 const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -167,13 +183,13 @@ const loginUser = async (req, res) => {
 
             const token = await generateToken({ id: existingUser._id })
             console.log({ token: token, user: existingUser })
-            return res.status(200).json({ token: token, user: existingUser });
+            return res.success({ token: token, user: existingUser });
         } else {
-            return res.status(404).json({ message: 'User not found or wrong password' });
+            return res.error(404).json({ message: 'User not found or wrong password' });
         }
     } catch (error) {
         console.error(error.message);
-        res.status(500).json({ error: "Failed to register user" });
+        res.error(500).json({ error: "Failed to register user" });
     }
 };
 
@@ -183,4 +199,4 @@ const profile = async (req, res) => {
 
 
 
-module.exports = { getAllUsers, registerUser, verifyUserEmail, verifyGoogleEmail, loginUser, verifyEmail, verifyUserOtp, changePassword, profile };
+module.exports = { getAllUsers, registerUser, verifyUserEmail, verifyGoogleEmail, loginUser, verifyEmail, verifyUserOtp, changePassword, profile,forgotPassword };

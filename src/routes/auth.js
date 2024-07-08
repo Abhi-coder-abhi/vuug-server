@@ -5,7 +5,7 @@ const {registerUser} = require("../controllers/auth")
 const {verifyUserEmail} = require("../controllers/auth")
 const {verifyGoogleEmail} = require("../controllers/auth")
 const {loginUser} = require("../controllers/auth")
-const {changePassword} = require("../controllers/auth")
+const {changePassword,forgotPassword} = require("../controllers/auth")
 const {profile} = require("../controllers/auth")
 const {  Authenticated, PassAuthenticated, validate } = require('../services/generate-token');
 
@@ -16,6 +16,7 @@ router.route("/verify-email").post(verifyUserEmail)
 router.route("/verify-otp").post(verifyUserOtp)
 router.route("/google-login").post(verifyGoogleEmail)
 router.route("/change-password").post(Authenticated,changePassword)
+router.route("/forgot-password").post(forgotPassword)
 router.route("/me").get(Authenticated,profile)
 
 module.exports = router;
