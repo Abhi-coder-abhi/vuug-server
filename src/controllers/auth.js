@@ -48,7 +48,7 @@ const verifyGoogleEmail = async (req, res) => {
                 if (!existingUser.googleLogin) {
                     return res.error({ message: 'Please login using password' });
                 }
-                const token = generateToken({ id: existingUser._id });
+                const token = await generateToken({ id: existingUser._id });
                 console.log(token);
                 return res.success({ token });
             } else {
