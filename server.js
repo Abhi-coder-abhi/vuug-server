@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const users_routes = require("./src/routes/auth")
+const users_data = require("./src/routes/user")
 const connectDB = require("./src/db/connect");
 const responseService= require("./src/services/response")
 
@@ -19,6 +20,7 @@ res.send("abhi");
 })
 
 app.use("/api/users", users_routes)
+app.use("/api/userdata", users_data)
 
 const start = async () =>{
     try{
