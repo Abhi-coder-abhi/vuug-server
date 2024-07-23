@@ -4,6 +4,7 @@ const userSchema = new mongoose.Schema({
     firstName: { type: String,  },
     lastName: { type: String,  },
     photo: { type: String, },
+    banner: { type: String, },
     email: { type: String,  },
     country: { type: String, },
     state: { type: String, },

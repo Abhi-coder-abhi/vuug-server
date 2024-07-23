@@ -186,6 +186,22 @@ const loginUser = async (req, res) => {
 const profile = async (req, res) => {
     return res.success({ user: req.user });
 };
+const profilePic= async(req, res) => {
+    try{
+    const email = req.user.email
+    const image = req.file;
+    console.log(image);
+    if (!image.path)
+        { return res.error("File upload failed.");}
+    const imagePath = image.destination + "/" + image.filename;
+    
+        await userModel.findOneAndUpdate({ email: email }, { $set: {photo:imagePath } });
+        return res.success("Photo updated successfully");
+    }catch (error) {
+        console.error(error.message);
+        res.error({ error: "Failed to upload pic" });
+    }
+  };
 
 module.exports = {
     getAllUsers,
@@ -197,5 +213,5 @@ module.exports = {
     verifyUserOtp,
     changePassword,
     profile,
-    forgotPassword
+    forgotPassword,profilePic
 };
