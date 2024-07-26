@@ -90,19 +90,35 @@ const verifyUserEmail = async (req, res) => {
         console.log("................/////api");
         const email = req.body.email;
         console.log(email);
+
+        // Regex for validating email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
         if (!email) {
             return res.error({ 
-                succes: false,
+                success: false,
                 message: "Email is required"
             });
         }
+        
+        if (!emailRegex.test(email)) {
+            return res.error({ 
+                success: false,
+                message: "Invalid email format"
+            });
+        }
+
         const type = req.body.type;
         if (type === "signup") {
             const existingUser = await userModel.findOne({ email: email });
             if (existingUser) {
-                return res.error({ error: "User with this email already exists. Please sign in." });
+                return res.error({ 
+                    success: false, 
+                    message: "User with this email already exists. Please sign in." 
+                });
             }
         }
+
         let existingOtp = await otpModel.findOne({ email: email });
         if (existingOtp) {
             await otpModel.findOneAndUpdate({ email: email }, { $set: { otp: OTP } });
@@ -113,13 +129,13 @@ const verifyUserEmail = async (req, res) => {
             });
             await newUser.save();
         }
+
         const result = await mailOTP(email, OTP);
         return res.success(result);
     } catch (error) {
-        res.error(error.message);
+        res.error({ success: false, message: error.message });
     }
 };
-
 const verifyUserOtp = async (req, res) => {
     try {
         const OTP = req.body.otp;
