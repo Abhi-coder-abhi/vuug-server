@@ -2,6 +2,7 @@ const userModel = require("../models/user-model");
 const otpModel = require("../models/otp-model");
 const { mailOTP } = require("../services/node-mailer");
 const { generateToken, decodeToken, Authenticated, PassAuthenticated, validate } = require('../services/generate-token'); 
+const validateEmail = require('../utils/email-test');
 
 const getAllUsers = async (req, res) => {
     return res.error({ error: "User with this email already exists. Please sign in." });
@@ -102,6 +103,12 @@ const verifyUserEmail = async (req, res) => {
         }
         
         if (!emailRegex.test(email)) {
+            return res.error({ 
+                success: false,
+                message: "Invalid email format"
+            });
+        }
+        if (!validateEmail.test(email)) {
             return res.error({ 
                 success: false,
                 message: "Invalid email format"
