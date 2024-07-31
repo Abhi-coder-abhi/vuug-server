@@ -112,16 +112,16 @@ const verifyUserEmail = async (req, res) => {
         const emailDomain = email.split('@')[1];
 
         if (!allowedDomains.includes(emailDomain)) {
-            return res.status(400).json({
+            return res.error({
                 success: false,
                 message: `Email domain is not allowed. Allowed domains are: ${allowedDomains.join(', ')}`
             });
         }
-
+ 
         const emailValidationResult = await validateEmail(email); // Await the result of validateEmail
 
         if (!emailValidationResult.success) {
-            return res.status(400).json({ 
+            return res.error({ 
                 success: false,
                 message: emailValidationResult.message,
                 reason: emailValidationResult.reason
