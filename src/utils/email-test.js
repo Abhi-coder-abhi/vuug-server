@@ -29,4 +29,4 @@ const validateEmail = async (email) => {
     }
 }
 
-export default validateEmail;
+module.exports =  validateEmail
