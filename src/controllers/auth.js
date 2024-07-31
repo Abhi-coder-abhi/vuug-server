@@ -108,13 +108,25 @@ const verifyUserEmail = async (req, res) => {
                 message: "Invalid email format"
             });
         }
-        if (!validateEmail.test(email)) {
-            return res.error({ 
+        const allowedDomains = ['gmail.com', 'yahoo.co.in', 'yahoo.com', 'outlook.com'];
+        const emailDomain = email.split('@')[1];
+
+        if (!allowedDomains.includes(emailDomain)) {
+            return res.status(400).json({
                 success: false,
-                message: "Invalid email format"
+                message: `Email domain is not allowed. Allowed domains are: ${allowedDomains.join(', ')}`
             });
         }
 
+        const emailValidationResult = await validateEmail(email); // Await the result of validateEmail
+
+        if (!emailValidationResult.success) {
+            return res.status(400).json({ 
+                success: false,
+                message: emailValidationResult.message,
+                reason: emailValidationResult.reason
+            });
+        }
         const type = req.body.type;
         if (type === "signup") {
             const existingUser = await userModel.findOne({ email: email });
