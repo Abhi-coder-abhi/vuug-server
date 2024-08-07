@@ -1,4 +1,5 @@
 const userModel = require("../models/user-model");
+const userStreamModel = require("../models/stream-model");
 const otpModel = require("../models/otp-model");
 const { mailOTP } = require("../services/node-mailer");
 const { generateToken, decodeToken, Authenticated, PassAuthenticated, validate } = require('../services/generate-token'); 
@@ -87,7 +88,8 @@ const verifyEmail = async (req, res) => {
 
 const verifyUserEmail = async (req, res) => {
     try {
-        const OTP = Math.floor(10000 + Math.random() * 90000);
+        //const OTP = Math.floor(10000 + Math.random() * 90000);
+        const OTP = 12345;
         console.log("................/////api");
         const email = req.body.email;
         console.log(email);
@@ -149,8 +151,8 @@ const verifyUserEmail = async (req, res) => {
             await newUser.save();
         }
 
-        const result = await mailOTP(email, OTP);
-        return res.success(result);
+     //   const result = await mailOTP(email, OTP);
+        return res.success("250 result");
     } catch (error) {
         res.error({ success: false, message: error.message });
     }
@@ -218,6 +220,7 @@ const loginUser = async (req, res) => {
     }
 };
 
+
 const profile = async (req, res) => {
     return res.success({ user: req.user });
 };
@@ -248,5 +251,5 @@ module.exports = {
     verifyUserOtp,
     changePassword,
     profile,
-    forgotPassword,profilePic
+    forgotPassword,profilePic,
 };

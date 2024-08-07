@@ -1,6 +1,7 @@
 const UserRelationModel = require("../models/friend-model");
 const userModel = require("../models/user-model");
 const otpModel = require("../models/otp-model");
+const userStreamModel = require("../models/stream-model");
 const { mailOTP } = require("../services/node-mailer");
 const { generateToken, decodeToken, Authenticated, PassAuthenticated, validate } = require('../services/generate-token'); 
 
@@ -80,4 +81,16 @@ const addUser = async (req, res) => {
         res.error(error.message);
     }
 };
-module.exports = {getUser,addUser}
+const userStreams =async (req, res) => {
+    let userId=req.user._id
+    let existingUser = await userStreamModel.findOne({ userId: userId});
+    if(existingUser?.links && existingUser.links.length>5){
+    return res.error({ error: "You have already used maximum limits" })
+    }
+    
+    else{
+        return res.success(existingUser);
+    }
+    }
+    
+module.exports = {getUser,addUser,userStreams}
